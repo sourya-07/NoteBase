@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <!-- Soft circular background matching the reference logo -->
+  <circle cx="120" cy="120" r="110" fill="#F4EFEA" />
+  <!-- Book Icon Path styled in the warm gold/amber shade -->
+  <path 
+    d="M75 55c0-5.5 4.5-10 10-10h70c5.5 0 10 4.5 10 10v115c0 5.5-4.5 10-10 10H85c-5.5 0-10-4.5-10-10V55z M75 145h90 M75 130c0 8.3 6.7 15 15 15h70"
+    fill="none" 
+    stroke="#C2872E" 
+    stroke-width="12" 
+    stroke-linecap="round" 
+    stroke-linejoin="round"
+  />
+</svg>
