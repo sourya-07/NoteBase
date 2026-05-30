@@ -64,7 +64,7 @@ export function WorkspacePage({ user, logout }) {
           </div>
           <div className="flex flex-col gap-1">
             <h2 className="text-lg font-semibold text-[var(--text-primary)]">
-              Waking up the server…
+              Server is waking up, please wait...
             </h2>
             <p className="text-sm text-[var(--text-muted)] leading-relaxed">
               The backend runs on a free tier and spins down after inactivity.

@@ -7,6 +7,8 @@ import logging
 import os
 from typing import List, Dict, Any, Optional
 
+IS_RENDER = os.environ.get("RENDER", False)
+
 from src.core.config import (
     CHROMA_PERSIST_DIR,
     EMBED_MODEL,
@@ -33,8 +35,7 @@ class ChromaRetriever:
 
         # Cross-encoder reranker (small, fast, free)
         # Automatically disable the heavy cross-encoder reranker on Render's 512MB RAM free tier to avoid OOM crashes
-        is_render = os.getenv("RENDER") == "true"
-        self.use_reranker = use_reranker if not is_render else False
+        self.use_reranker = use_reranker if not IS_RENDER else False
         
         if self.use_reranker:
             logger.info("Loading cross-encoder reranker: cross-encoder/ms-marco-MiniLM-L-6-v2")
@@ -46,7 +47,7 @@ class ChromaRetriever:
                 self.use_reranker = False
                 self.reranker = None
         else:
-            if is_render:
+            if IS_RENDER:
                 logger.info("Reranker disabled in Render environment to conserve memory.")
             self.reranker = None
 

@@ -13,9 +13,6 @@ from typing import List, Dict, Any, Optional
 
 import numpy as np
 
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-
 from src.rag.retriever import ChromaRetriever
 from src.core.config import (
     EMBED_MODEL,
@@ -169,6 +166,8 @@ class RAGChain:
         Execute the full RAG chain for a user question against a specific index.
         Returns a RAGResponse dataclass.
         """
+        from langchain_core.prompts import ChatPromptTemplate
+        from langchain_core.output_parsers import StrOutputParser
         t0 = time.time()
 
         # 1. Retrieve context from ChromaDB

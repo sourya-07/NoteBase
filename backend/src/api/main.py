@@ -23,13 +23,13 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="NoteBase RAG API", lifespan=lifespan)
 
 @app.get("/")
-def read_root():
-    return {"status": "healthy", "message": "NoteBase RAG API is running"}
+def health():
+    return {"status": "ok"}
 
 # Enable CORS for frontend integration
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex="https?://.*",
+    allow_origin_regex=r"https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

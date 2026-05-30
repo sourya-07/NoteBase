@@ -13,9 +13,6 @@ from typing import List, Dict, Any
 
 import requests
 from bs4 import BeautifulSoup
-from langchain_core.documents import Document
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-
 from src.core.config import (
     CHROMA_PERSIST_DIR,
     EMBED_MODEL,
@@ -50,6 +47,8 @@ def ingest_documents(index_name: str, docs: List[Dict[str, str]], links: List[st
     links: list of URLs to scrape
     Returns number of vectors upserted.
     """
+    from langchain_core.documents import Document
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
     from langchain_huggingface import HuggingFaceEmbeddings
     from langchain_chroma import Chroma
 

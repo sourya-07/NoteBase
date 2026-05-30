@@ -1,8 +1,8 @@
 import { supabase } from "../lib/supabase";
 
-const API_URL = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "");
+const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 const MAX_RETRIES = 3;
-const RETRY_DELAY_MS = 3000;
+const RETRY_DELAY_MS = 5000;
 
 // ─── Wake-up Ping ─────────────────────────────────────────────────────────────
 // Polls /health until the backend responds 200 or timeout reached.
