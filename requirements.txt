@@ -46,3 +46,6 @@ langchain-groq>=0.1.0
 langchain-openai>=0.1.0
 langchain-huggingface>=0.0.3
 
+# PostgreSQL client
+psycopg2-binary>=2.9.9
+
