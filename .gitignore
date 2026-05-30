@@ -13,6 +13,7 @@ env/
 *.log
 *.json
 !package.json
+!vercel.json
 .DS_Store
 Thumbs.db
 .idea/
