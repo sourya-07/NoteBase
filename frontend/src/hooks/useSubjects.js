@@ -1,35 +1,60 @@
-import { useState, useEffect } from "react";
-import { api } from "../services/api";
+import { useState, useEffect, useCallback } from "react";
+import { api, wakeUpBackend } from "../services/api";
 
 export function useSubjects(session) {
   const [subjects, setSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+  const [warmingUp, setWarmingUp] = useState(false);
+  const [wakeUpSeconds, setWakeUpSeconds] = useState(0);
+
   const [activeSubjectId, setActiveSubjectId] = useState(() => {
     return localStorage.getItem("notebase_active_subject_id") || "";
   });
 
-  const fetchSubjects = async () => {
+  const fetchSubjects = useCallback(async () => {
     if (!session) return;
     try {
       setLoading(true);
+      setError(null);
       const data = await api.getSubjects();
       setSubjects(data);
+      setWarmingUp(false);
       if (data.length > 0 && (!activeSubjectId || !data.some(s => s.id === activeSubjectId))) {
         setActiveSubjectId(data[0].id);
       }
     } catch (err) {
-      console.error("Failed to fetch subjects:", err);
-      setError(err.message);
+      const isNetworkError =
+        err instanceof TypeError ||
+        err.message?.includes("failed to fetch") ||
+        err.message?.includes("starting up");
+
+      if (isNetworkError) {
+        // Backend is cold-starting — show warming up UI and poll until alive
+        setWarmingUp(true);
+        setLoading(false);
+        const alive = await wakeUpBackend((elapsed) => {
+          setWakeUpSeconds(elapsed);
+        });
+        if (alive) {
+          setWarmingUp(false);
+          fetchSubjects(); // retry now that backend is up
+        } else {
+          setError("Backend took too long to respond. Please refresh the page.");
+          setWarmingUp(false);
+        }
+      } else {
+        console.error("Failed to fetch subjects:", err);
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }, [session]);
 
   useEffect(() => {
     fetchSubjects();
-  }, [session]);
+  }, [fetchSubjects]);
 
   useEffect(() => {
     if (activeSubjectId) {
@@ -75,7 +100,6 @@ export function useSubjects(session) {
     try {
       const urlsStr = urlsList.join("\n");
       const result = await api.ingest(subjectId, files, urlsStr, reset);
-      // Backend returns { success: true, docCount: X, documents: [...] }
       setSubjects((prev) =>
         prev.map((s) => {
           if (s.id !== subjectId) return s;
@@ -125,7 +149,9 @@ export function useSubjects(session) {
     deleteDocumentFromSubject,
     loading,
     error,
-    refresh: fetchSubjects
+    warmingUp,
+    wakeUpSeconds,
+    refresh: fetchSubjects,
   };
 }
 

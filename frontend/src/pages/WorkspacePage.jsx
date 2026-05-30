@@ -12,7 +12,7 @@ import MetricsDisplay from "../components/qa/MetricsDisplay";
 import ContextDrawer from "../components/qa/ContextDrawer";
 import useSubjects from "../hooks/useSubjects";
 import { api } from "../services/api";
-import { Loader2 } from "lucide-react";
+import { Loader2, Server, RefreshCw } from "lucide-react";
 import LandingPage from "./LandingPage";
 
 export function WorkspacePage({ user, logout }) {
@@ -29,7 +29,11 @@ export function WorkspacePage({ user, logout }) {
     deleteSubject,
     addDocumentsToSubject,
     deleteDocumentFromSubject,
-    loading: subjectsLoading
+    loading: subjectsLoading,
+    warmingUp,
+    wakeUpSeconds,
+    error: subjectsError,
+    refresh: refreshSubjects,
   } = useSubjects(user);
 
   // Content state for Manage Tab
@@ -46,7 +50,72 @@ export function WorkspacePage({ user, logout }) {
     return <LandingPage user={user} onBegin={() => setView("workspace")} />;
   }
 
-  // 2. Add Content Action Handler
+  // 2. Backend warming up (Render free-tier cold start)
+  if (warmingUp) {
+    return (
+      <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-5 max-w-sm text-center px-6">
+          <div className="relative">
+            <Server className="text-[var(--accent)] opacity-80" size={48} />
+            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-[var(--accent)]"></span>
+            </span>
+          </div>
+          <div className="flex flex-col gap-1">
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">
+              Waking up the server…
+            </h2>
+            <p className="text-sm text-[var(--text-muted)] leading-relaxed">
+              The backend runs on a free tier and spins down after inactivity.
+              It usually takes <strong>30–60 seconds</strong> to wake up.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-muted)] bg-[var(--surface)] px-4 py-2 rounded-full border border-[var(--border)]">
+            <Loader2 className="animate-spin" size={12} />
+            {wakeUpSeconds > 0 ? `${wakeUpSeconds}s elapsed` : "Connecting…"}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. Error state (backend unreachable after timeout)
+  if (subjectsError && !subjectsLoading) {
+    return (
+      <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4 max-w-sm text-center px-6">
+          <Server className="text-red-400" size={40} />
+          <div className="flex flex-col gap-1">
+            <h2 className="text-base font-semibold text-[var(--text-primary)]">
+              Could not reach the server
+            </h2>
+            <p className="text-sm text-[var(--text-muted)]">{subjectsError}</p>
+          </div>
+          <button
+            onClick={refreshSubjects}
+            className="flex items-center gap-2 text-sm border border-[var(--accent)] text-[var(--accent)] px-4 py-2 rounded hover:bg-[var(--accent)] hover:text-white transition-all cursor-pointer"
+          >
+            <RefreshCw size={14} />
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 4. Initial subjects loading spinner
+  if (subjectsLoading) {
+    return (
+      <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="animate-spin text-[var(--accent)]" size={32} />
+          <span className="text-sm font-mono text-[var(--text-muted)]">Opening vault drawers...</span>
+        </div>
+      </div>
+    );
+  }
+
   const handleAddContent = async (draggedFiles = null) => {
     if (!activeSubject) return;
 
@@ -92,16 +161,7 @@ export function WorkspacePage({ user, logout }) {
     handleAsk(ex);
   };
 
-  if (subjectsLoading) {
-    return (
-      <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="animate-spin text-[var(--accent)]" size={32} />
-          <span className="text-sm font-mono text-[var(--text-muted)]">Opening vault drawers...</span>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <Shell
