@@ -25,6 +25,12 @@ Thumbs.db
 # Evaluation outputs
 # ChromaDB local data
 chroma_data/
+backend/.env
+backend/.env.local
+backend/chroma_data/
+backend/subjects.json
+backend/.venv/
+
 
 # Frontend dependencies and builds
 frontend/node_modules/

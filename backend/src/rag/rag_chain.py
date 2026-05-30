@@ -6,11 +6,11 @@ Evaluation metrics computed locally offline without external API dependencies.
 """
 
 import logging
+import os
 import time
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
 
-from sentence_transformers import SentenceTransformer
 import numpy as np
 
 from langchain_core.prompts import ChatPromptTemplate
@@ -89,11 +89,17 @@ def _get_llm():
 class _MetricComputer:
     """Lazy-loaded singleton for metric computation."""
     _instance: Optional["_MetricComputer"] = None
-    _embedder: Optional[SentenceTransformer] = None
+    _embedder: Optional[Any] = None
 
     @classmethod
-    def get(cls) -> SentenceTransformer:
+    def get(cls):
+        # Disable heavy metric calculations in 512MB Render environments to prevent OOM crashes
+        if os.getenv("RENDER") == "true":
+            logger.info("SentenceTransformer metrics skipped on Render to conserve RAM.")
+            return None
+            
         if cls._embedder is None:
+            from sentence_transformers import SentenceTransformer
             cls._embedder = SentenceTransformer(EMBED_MODEL)
         return cls._embedder
 
@@ -106,6 +112,8 @@ def compute_faithfulness(answer: str, context: str) -> float:
     if not answer or not context:
         return 0.0
     embedder = _MetricComputer.get()
+    if embedder is None:
+        return 0.0
     embs = embedder.encode([answer, context], normalize_embeddings=True)
     score = float(np.dot(embs[0], embs[1]))
     return max(0.0, min(1.0, score))
@@ -119,6 +127,8 @@ def compute_answer_relevancy(question: str, answer: str) -> float:
     if not question or not answer:
         return 0.0
     embedder = _MetricComputer.get()
+    if embedder is None:
+        return 0.0
     embs = embedder.encode([question, answer], normalize_embeddings=True)
     score = float(np.dot(embs[0], embs[1]))
     return max(0.0, min(1.0, score))

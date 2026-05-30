@@ -4,11 +4,8 @@ Retrieval layer: queries ChromaDB via LangChain, optionally reranks results.
 """
 
 import logging
+import os
 from typing import List, Dict, Any, Optional
-
-from sentence_transformers import CrossEncoder
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_chroma import Chroma
 
 from src.core.config import (
     CHROMA_PERSIST_DIR,
@@ -27,6 +24,7 @@ class ChromaRetriever:
     """
 
     def __init__(self, use_reranker: bool = True):
+        from langchain_huggingface import HuggingFaceEmbeddings
         logger.info(f"Loading HuggingFace embedding model: {EMBED_MODEL}")
         self.embeddings = HuggingFaceEmbeddings(
             model_name=EMBED_MODEL,
@@ -34,16 +32,22 @@ class ChromaRetriever:
         )
 
         # Cross-encoder reranker (small, fast, free)
-        self.use_reranker = use_reranker
-        if use_reranker:
+        # Automatically disable the heavy cross-encoder reranker on Render's 512MB RAM free tier to avoid OOM crashes
+        is_render = os.getenv("RENDER") == "true"
+        self.use_reranker = use_reranker if not is_render else False
+        
+        if self.use_reranker:
             logger.info("Loading cross-encoder reranker: cross-encoder/ms-marco-MiniLM-L-6-v2")
             try:
+                from sentence_transformers import CrossEncoder
                 self.reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
             except Exception as e:
                 logger.warning(f"Could not load reranker: {e}. Disabling reranking.")
                 self.use_reranker = False
                 self.reranker = None
         else:
+            if is_render:
+                logger.info("Reranker disabled in Render environment to conserve memory.")
             self.reranker = None
 
     def retrieve(
@@ -59,6 +63,7 @@ class ChromaRetriever:
         Returns a list of dicts with keys: id, score, title, url, category, text.
         """
         try:
+            from langchain_chroma import Chroma
             db = Chroma(
                 collection_name=index_name,
                 embedding_function=self.embeddings,
