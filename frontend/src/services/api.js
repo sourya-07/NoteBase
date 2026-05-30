@@ -19,7 +19,9 @@ async function request(path, options = {}) {
     headers["Content-Type"] = "application/json";
   }
 
-  const response = await fetch(`${API_URL}${path}`, {
+  // Ensure API_URL doesn't end with a slash, preventing double slashes
+  const cleanApiUrl = API_URL.replace(/\/$/, "");
+  const response = await fetch(`${cleanApiUrl}${path}`, {
     ...options,
     headers,
   });
