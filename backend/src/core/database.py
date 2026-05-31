@@ -44,7 +44,7 @@ def init_db():
                     id SERIAL PRIMARY KEY,
                     user_id VARCHAR(255) NOT NULL,
                     name VARCHAR(255) NOT NULL,
-                    index_name VARCHAR(255) NOT NULL,
+                    index_name VARCHAR(255) NOT NULL, # Stores Chroma collection name.
                     docs_count INTEGER DEFAULT 0,
                     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                     UNIQUE(user_id, name)
@@ -72,7 +72,7 @@ def load_subjects(user_id='gradio_default_user'):
         subjects = {}
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT name, index_name, docs_count, created_at FROM subjects WHERE user_id = %s",
+                "SELECT name, index_name, docs_count, created_at FROM subjects WHERE user_id = %s", # if userID = "abc123" then %s receives WHERE user_id = 'abc123'
                 (user_id,)
             )
             for row in cur.fetchall():
@@ -149,9 +149,9 @@ def create_or_get_subject(subject_name, user_id='gradio_default_user'):
     subjects = load_subjects(user_id)
     if subject_name not in subjects:
         # Create a URL friendly index name
-        index_name = "".join(c if c.isalnum() else "_" for c in subject_name).lower()
+        index_name = "".join(c if c.isalnum() else "_" for c in subject_name).lower() # here .isalnum used to check alphanumbers("aw23")
         if not index_name:
-            index_name = "default_" + os.urandom(4).hex()
+            index_name = "default_" + os.urandom(4).hex() # os.urandom(4).hex() generates an 8-character secure random hexadecimal string.
             
         subjects[subject_name] = {
             "index_name": index_name,

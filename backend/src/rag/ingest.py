@@ -28,9 +28,9 @@ def fetch_url_content(url: str, timeout: int = 10) -> str:
     """Fetch and clean text content from a URL."""
     try:
         headers = {"User-Agent": "Mozilla/5.0 (compatible; MyRAGBot/1.0)"}
-        resp = requests.get(url, headers=headers, timeout=timeout)
+        resp = requests.get(url, headers=headers, timeout=timeout) # request.get downloades the webpage HTML
         resp.raise_for_status()
-        soup = BeautifulSoup(resp.text, "html.parser")
+        soup = BeautifulSoup(resp.text, "html.parser") # Convert HTML into a Python object
         # Remove nav, footer, script, style
         for tag in soup(["nav", "footer", "script", "style", "header", "aside"]):
             tag.decompose()
@@ -143,10 +143,13 @@ def ingest_documents(index_name: str, docs: List[Dict[str, str]], links: List[st
     logger.info(f"Upserting {len(langchain_docs)} chunks into Chroma collection...")
     db.add_documents(langchain_docs)
 
-    logger.info(f"✅ Ingestion complete! {len(langchain_docs)} documents indexed in collection '{index_name}'.")
+    logger.info(f"Ingestion complete! {len(langchain_docs)} documents indexed in collection '{index_name}'.")
     return len(langchain_docs)
 
 
+
+
+# Run this code only when this file is executed directly.
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Multi-Subject Notes Ingestion Pipeline")
     parser.add_argument("--subject", type=str, required=True, help="Subject name to ingest into")

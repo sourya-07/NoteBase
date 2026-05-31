@@ -30,8 +30,6 @@ export function WorkspacePage({ user, logout }) {
     addDocumentsToSubject,
     deleteDocumentFromSubject,
     loading: subjectsLoading,
-    warmingUp,
-    wakeUpSeconds,
     error: subjectsError,
     refresh: refreshSubjects,
   } = useSubjects(user);
@@ -45,42 +43,12 @@ export function WorkspacePage({ user, logout }) {
   const [isAsking, setIsAsking] = useState(false);
   const [qaResult, setQaResult] = useState(null);
 
-  // 1. Landing View Render
+  // 1. Landing view
   if (view === "landing") {
     return <LandingPage user={user} onBegin={() => setView("workspace")} />;
   }
 
-  // 2. Backend warming up (Render free-tier cold start)
-  if (warmingUp) {
-    return (
-      <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-5 max-w-sm text-center px-6">
-          <div className="relative">
-            <Server className="text-[var(--accent)] opacity-80" size={48} />
-            <span className="absolute -top-1 -right-1 flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-[var(--accent)]"></span>
-            </span>
-          </div>
-          <div className="flex flex-col gap-1">
-            <h2 className="text-lg font-semibold text-[var(--text-primary)]">
-              Server is waking up, please wait...
-            </h2>
-            <p className="text-sm text-[var(--text-muted)] leading-relaxed">
-              The backend runs on a free tier and spins down after inactivity.
-              It usually takes <strong>30–60 seconds</strong> to wake up.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-muted)] bg-[var(--surface)] px-4 py-2 rounded-full border border-[var(--border)]">
-            <Loader2 className="animate-spin" size={12} />
-            {wakeUpSeconds > 0 ? `${wakeUpSeconds}s elapsed` : "Connecting…"}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // 3. Error state (backend unreachable after timeout)
+  // 2. Error state (backend unreachable)
   if (subjectsError && !subjectsLoading) {
     return (
       <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
@@ -104,7 +72,7 @@ export function WorkspacePage({ user, logout }) {
     );
   }
 
-  // 4. Initial subjects loading spinner
+  // 3. Initial subjects loading spinner
   if (subjectsLoading) {
     return (
       <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">

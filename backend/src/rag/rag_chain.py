@@ -6,7 +6,6 @@ Evaluation metrics computed locally offline without external API dependencies.
 """
 
 import logging
-import os
 import time
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
@@ -66,11 +65,6 @@ class _MetricComputer:
 
     @classmethod
     def get(cls):
-        # Disable heavy metric calculations in 512MB Render environments to prevent OOM crashes
-        if os.getenv("RENDER") == "true":
-            logger.info("SentenceTransformer metrics skipped on Render to conserve RAM.")
-            return None
-            
         if cls._embedder is None:
             from sentence_transformers import SentenceTransformer
             cls._embedder = SentenceTransformer(EMBED_MODEL)

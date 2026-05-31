@@ -31,7 +31,7 @@ def get_embeddings():
         from src.core.config import EMBED_MODEL
         import torch
         device = "mps" if torch.backends.mps.is_available() else "cpu"
-        _embeddings = HuggingFaceEmbeddings(
+        _embeddings = HuggingFaceEmbeddings( # Loads the model
             model_name=EMBED_MODEL,
             model_kwargs={"device": device}
         )
@@ -41,7 +41,7 @@ def _get_rag_chain() -> RAGChain:
     global _rag_chain
     if _rag_chain is None:
         logger.info("Initializing RAG chain...")
-        _rag_chain = RAGChain(use_reranker=True)
+        _rag_chain = RAGChain(use_reranker=True) # Create a RAG pipeline and enable reranking.
     return _rag_chain
 
 # Helper: format ISO dates to "Month Day, Year"

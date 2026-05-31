@@ -4,28 +4,6 @@ const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 5000;
 
-// ─── Wake-up Ping ─────────────────────────────────────────────────────────────
-// Polls /health until the backend responds 200 or timeout reached.
-// Returns true if backend is alive, false otherwise.
-export async function wakeUpBackend(onProgress, maxWaitMs = 90000) {
-  const baseUrl = API_URL.replace(/\/api$/, "");
-  const healthUrl = `${API_URL}/health`;
-  const started = Date.now();
-
-  while (Date.now() - started < maxWaitMs) {
-    try {
-      const res = await fetch(healthUrl, { method: "GET", cache: "no-store" });
-      if (res.ok) return true;
-    } catch {
-      // still sleeping — keep polling
-    }
-    const elapsed = Math.round((Date.now() - started) / 1000);
-    if (onProgress) onProgress(elapsed);
-    await new Promise((r) => setTimeout(r, 4000));
-  }
-  return false;
-}
-
 // ─── Sleep helper ─────────────────────────────────────────────────────────────
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
@@ -50,12 +28,12 @@ async function request(path, options = {}, retries = MAX_RETRIES) {
       });
 
       if (response.status === 502 || response.status === 503) {
-        // Backend is cold-starting — wait and retry
+        // Backend unavailable — wait and retry
         if (attempt < retries) {
           await sleep(RETRY_DELAY_MS);
           continue;
         }
-        throw new Error("Backend is starting up. Please wait a moment and try again.");
+        throw new Error("Backend is unavailable. Please try again in a moment.");
       }
 
       if (response.status === 401) {
@@ -69,7 +47,7 @@ async function request(path, options = {}, retries = MAX_RETRIES) {
 
       return response.json();
     } catch (err) {
-      // Network error (ERR_FAILED) = Render is cold-starting — retry
+      // Network error — retry
       const isNetworkError =
         err instanceof TypeError && err.message.toLowerCase().includes("failed to fetch");
       if (isNetworkError && attempt < retries) {

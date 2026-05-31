@@ -4,10 +4,7 @@ Retrieval layer: queries ChromaDB via LangChain, optionally reranks results.
 """
 
 import logging
-import os
 from typing import List, Dict, Any, Optional
-
-IS_RENDER = os.environ.get("RENDER", False)
 
 from src.core.config import (
     CHROMA_PERSIST_DIR,
@@ -34,8 +31,7 @@ class ChromaRetriever:
         )
 
         # Cross-encoder reranker (small, fast, free)
-        # Automatically disable the heavy cross-encoder reranker on Render's 512MB RAM free tier to avoid OOM crashes
-        self.use_reranker = use_reranker if not IS_RENDER else False
+        self.use_reranker = use_reranker
         
         if self.use_reranker:
             logger.info("Loading cross-encoder reranker: cross-encoder/ms-marco-MiniLM-L-6-v2")
@@ -47,8 +43,6 @@ class ChromaRetriever:
                 self.use_reranker = False
                 self.reranker = None
         else:
-            if IS_RENDER:
-                logger.info("Reranker disabled in Render environment to conserve memory.")
             self.reranker = None
 
     def retrieve(
