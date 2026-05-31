@@ -29,7 +29,6 @@ EXPOSE 7860
 
 # Default environment variables (override via docker-compose or -e flags)
 ENV CHROMA_PERSIST_DIR=/app/chroma_data \
-    LLM_PROVIDER=groq \
     GROQ_MODEL=llama3-8b-8192 \
     EMBED_MODEL=all-MiniLM-L6-v2 \
     EMBED_DIM=384 \

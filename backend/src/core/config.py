@@ -24,14 +24,9 @@ CHUNK_OVERLAP: int = int(os.getenv("CHUNK_OVERLAP", "40"))  # overlapping words
 TOP_K: int = int(os.getenv("TOP_K", "5"))               # candidates to retrieve
 RERANK_TOP_N: int = int(os.getenv("RERANK_TOP_N", "3")) # after reranking
 
-# LLM Settings
-LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "groq")   # "openai" | "groq" | "ollama"
-OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
-OPENAI_MODEL: str = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+# LLM Settings (Exclusively using Groq)
 GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
 GROQ_MODEL: str = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
-OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama3")
 LLM_MAX_TOKENS: int = int(os.getenv("LLM_MAX_TOKENS", "4096"))
 LLM_TEMPERATURE: float = float(os.getenv("LLM_TEMPERATURE", "0.2"))
 

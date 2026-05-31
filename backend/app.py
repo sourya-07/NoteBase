@@ -10,11 +10,8 @@ from src.core.config import (
     APP_HOST,
     APP_PORT,
     DEBUG,
-    LLM_PROVIDER,
-    OPENAI_API_KEY,
     GROQ_API_KEY,
     GROQ_MODEL,
-    OLLAMA_MODEL,
 )
 from src.rag.rag_chain import RAGChain
 from src.core.database import load_subjects, create_or_get_subject, get_subject_index_name
@@ -64,18 +61,9 @@ def _format_metrics(faithfulness: float, relevancy: float, latency: float) -> st
     )
 
 def _llm_status() -> str:
-    provider = LLM_PROVIDER.lower()
-    if provider == "openai":
-        if OPENAI_API_KEY:
-            return f"OpenAI ({os.getenv('OPENAI_MODEL', 'gpt-4o-mini')})"
-        return "Warning: OpenAI — no API key set"
-    elif provider == "groq":
-        if GROQ_API_KEY:
-            return f"Groq ({GROQ_MODEL})"
-        return "Warning: Groq — no API key set"
-    elif provider == "ollama":
-        return f"Ollama ({OLLAMA_MODEL})"
-    return f"Unknown: {LLM_PROVIDER}"
+    if GROQ_API_KEY:
+        return f"Groq ({GROQ_MODEL})"
+    return "Warning: Groq — no API key set"
 
 # Core Logic
 

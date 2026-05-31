@@ -1,7 +1,7 @@
 """
 rag_chain.py – Multi-Subject Notes RAG
 RAG chain: retrieves context from ChromaDB, prompts the LLM via LangChain LCEL, returns answer + sources.
-Supports OpenAI, Groq, and Ollama (local) chat models.
+Exclusively supports the Groq chat model.
 Evaluation metrics computed locally offline without external API dependencies.
 """
 
@@ -16,13 +16,8 @@ import numpy as np
 from src.rag.retriever import ChromaRetriever
 from src.core.config import (
     EMBED_MODEL,
-    LLM_PROVIDER,
-    OPENAI_API_KEY,
-    OPENAI_MODEL,
     GROQ_API_KEY,
     GROQ_MODEL,
-    OLLAMA_BASE_URL,
-    OLLAMA_MODEL,
     LLM_MAX_TOKENS,
     LLM_TEMPERATURE,
     TOP_K,
@@ -53,32 +48,13 @@ Please provide a clear, well-structured answer with citations."""
 
 def _get_llm():
     """Build and return a LangChain Chat Model based on configuration."""
-    provider = LLM_PROVIDER.lower()
-    if provider == "openai":
-        from langchain_openai import ChatOpenAI
-        return ChatOpenAI(
-            api_key=OPENAI_API_KEY,
-            model=OPENAI_MODEL,
-            max_tokens=LLM_MAX_TOKENS,
-            temperature=LLM_TEMPERATURE,
-        )
-    elif provider == "groq":
-        from langchain_groq import ChatGroq
-        return ChatGroq(
-            api_key=GROQ_API_KEY,
-            model=GROQ_MODEL,
-            max_tokens=LLM_MAX_TOKENS,
-            temperature=LLM_TEMPERATURE,
-        )
-    elif provider == "ollama":
-        from langchain_community.chat_models import ChatOllama
-        return ChatOllama(
-            base_url=OLLAMA_BASE_URL,
-            model=OLLAMA_MODEL,
-            temperature=LLM_TEMPERATURE,
-        )
-    else:
-        raise ValueError(f"Unknown LLM_PROVIDER='{LLM_PROVIDER}'. Set to 'openai', 'groq', or 'ollama'.")
+    from langchain_groq import ChatGroq
+    return ChatGroq(
+        api_key=GROQ_API_KEY,
+        model=GROQ_MODEL,
+        max_tokens=LLM_MAX_TOKENS,
+        temperature=LLM_TEMPERATURE,
+    )
 
 
 # ── Evaluation Metrics ────────────────────────────────────────────────────────
